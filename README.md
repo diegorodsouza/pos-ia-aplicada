@@ -22,3 +22,4 @@ Um repositório para ser sempre minha referência de projetos JS com IA Aplicada
 | :-------- | :------- | :------------------------- |
 | [Exemplo 00](https://github.com/diegorodsouza/pos-ia-aplicada/tree/main/Exemplo_00_Tensores) | TensorFlow | Predição de categorização de usuário com base em perfil etário, geográfico e preferencia de cor |
 | [Exemplo 01](https://github.com/diegorodsouza/pos-ia-aplicada/tree/main/Exemplo_01_Recomendacao) | Sistema Web de Recomendações | Predição de recomendação de produtos com base em compras passadas de perfis de usuários semelhantes |
+| [Exemplo 02](https://github.com/diegorodsouza/pos-ia-aplicada/tree/main/Exemplo_02_Duckhunt) | Autoclick Duckhunt | Ação de cliques em tela com base em índice de confianca de detecção de classes utilizando TensorFlow e [YOLOv7](https://medium.com/data-science/training-a-custom-yolov7-in-pytorch-and-running-it-directly-in-the-browser-with-tensorflow-js-96a5ecd7a530) |
