@@ -3,7 +3,7 @@ import { workerEvents } from "../events/constants.js"
 
 console.log("Model training worker initialized")
 let _globalCtx = {}
-let _model = {}
+let _model = null
 
 // Quanto maior o peso, mais importante é aquele fator para a recomendação de produtos para
 // perfis similares de usuários
@@ -20,17 +20,17 @@ const WEIGHTS = {
 // Exemplo: preço=129.99, minPrice=39.99, maxPrice=199.99 → 0.56
 const normalize = (value, min, max) => (value - min) / (max - min || 1)
 
-function makeContext(catalog, users) {
+function makeContext(products, users) {
   const ages = users.map((u) => u.age)
-  const prices = catalog.map((p) => p.price)
+  const prices = products.map((p) => p.price)
 
   const minAge = Math.min(...ages)
   const maxAge = Math.max(...ages)
   const minPrice = Math.min(...prices)
   const maxPrice = Math.max(...prices)
 
-  const colors = [...new Set(catalog.map((p) => p.color))]
-  const categories = [...new Set(catalog.map((p) => p.category))]
+  const colors = [...new Set(products.map((p) => p.color))]
+  const categories = [...new Set(products.map((p) => p.category))]
 
   const colorsIndex = Object.fromEntries(
     colors.map((color, index) => {
@@ -59,7 +59,7 @@ function makeContext(catalog, users) {
 
   // Cria um dicionário com a média de idade para cada produto já normalizada
   const productAvgAgeNorm = Object.fromEntries(
-    catalog.map((product) => {
+    products.map((product) => {
       // media = soma das idades / número de compradores
       const avgAge = ageSums[product.name] ? ageSums[product.name] / ageCounts[product.name] : midAge
 
@@ -69,7 +69,7 @@ function makeContext(catalog, users) {
 
   // Transformando os dados em tensores para o modelo
   return {
-    catalog,
+    products,
     users,
     colorsIndex,
     categoriesIndex,
@@ -121,6 +121,17 @@ function encodeUser(user, context) {
       .mean(0)
       .reshape([1, context.dimensions])
   }
+
+  // Se o usuário não tiver compras, retornamos um vetor neutro (todos os valores iguais)
+  // para que o modelo possa aprender a recomendar produtos com base em características gerais
+  return tf
+    .concat1d([
+      tf.zeros([1]), // preço ignorado
+      tf.tensor1d([normalize(user.age, context.minAge, context.maxAge) * WEIGHTS.age]), // para ficar o mais próximo possível do perfil médio de compra, usamos a idade do usuário normalizada, pois a idade é um fator importante para recomendar produtos adequados para cada faixa etária
+      tf.zeros([context.numCategories]), // categorias ignoradas
+      tf.zeros([context.numColors]) // cores ignoradas
+    ])
+    .reshape([1, context.dimensions])
 }
 
 // Criar os dados de treinamento combinando os vetores dos usuários e dos produtos, e as labels,
@@ -135,7 +146,7 @@ function createTrainingData(context) {
     .filter((user) => user.purchases.length)
     .forEach((user) => {
       const userVector = encodeUser(user, context).dataSync()
-      context.catalog.forEach((product) => {
+      context.products.forEach((product) => {
         const productVector = encodeProduct(product, context).dataSync()
 
         const label = user.purchases.some((purchase) => purchase.name === product.name) ? 1 : 0
@@ -234,10 +245,10 @@ async function trainModel({ users }) {
 
   postMessage({ type: workerEvents.progressUpdate, progress: { progress: 50 } })
 
-  const catalog = await (await fetch("/data/products.json")).json()
+  const products = await (await fetch("/data/products.json")).json()
 
-  const context = makeContext(catalog, users)
-  context.productVectors = catalog.map((product) => {
+  const context = makeContext(products, users)
+  context.productVectors = products.map((product) => {
     return {
       name: product.name,
       meta: { ...product },
@@ -259,13 +270,59 @@ async function trainModel({ users }) {
   postMessage({ type: workerEvents.trainingComplete })
 }
 
-function recommend(user, ctx) {
-  console.log("will recommend for user:", user)
-  // postMessage({
-  //     type: workerEvents.recommend,
-  //     user,
-  //     recommendations: []
-  // });
+function recommend(user, context) {
+  if (!_model) return
+
+  // Converte o usuario fornecido no vetor de caracteristicas codificadas
+  // (preço ignorado, idade normalizada, one-hot de categorias e one-hot de cores ignoradas)
+  // isso transforma as informações do usuário em um mesmo formato numérico que foi usado
+  // para treinar o modelo
+  const userVector = encodeUser(user, context).dataSync()
+
+  // Em aplicações reais:
+  //  Armazene todos os vetores de produtos em um banco de dados vetorial (como Postgres, Neo4j ou Pinecone)
+  //  Consulta: Encontre os 200 produtos mais próximos do vetor do usuário
+  //  Execute _model.predict() apenas nesses produtos
+
+  // Cria pares de entrada: para cada produto, concatena o vetor do usuário
+  // com o vetor codificado do produto. Dessa forma o modelo prevê o "score de compatibilidade"
+  // para cada par (usuário, produto)
+  const inputs = context.productVectors.map(({ vector }) => {
+    return [...userVector, ...vector]
+  })
+
+  // Converta todos esses pares (usuário, produto) em um único Tensor.
+  // Formato: [numProdutos, inputDim]
+  const inputVector = tf.tensor2d(inputs)
+
+  // Rode a rede neural treinada em todos os pares (usuário, produto) de uma vez.
+  // O resultado é uma pontuação para cada produto entre 0 e 1.
+  // Quanto maior, maior a probabilidade do usuário querer aquele produto.
+  const predictions = _model.predict(inputVector)
+
+  // Extraia as pontuações para um array JS normal.
+  const scores = predictions.dataSync()
+
+  // Mapeia cada produto para um objeto que inclui suas informações originais
+  // e a pontuação prevista pelo modelo, para que possamos ordenar os produtos com base
+  // nessas pontuações e recomendar os mais relevantes para o usuário.
+  const recommendations = context.productVectors.map((item, index) => {
+    return {
+      ...item.meta,
+      name: item.name,
+      score: scores[index] // previsão do modelo para este produto
+    }
+  })
+
+  const sortedItems = recommendations.sort((a, b) => b.score - a.score)
+
+  // Envie a lista ordenada de produtos recomendados
+  // para a thread principal (a UI pode exibi-los agora).
+  postMessage({
+    type: workerEvents.recommend,
+    user,
+    recommendations: sortedItems
+  })
 }
 
 const handlers = {
