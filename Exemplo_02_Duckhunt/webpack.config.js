@@ -1,18 +1,23 @@
-'use strict';
+/* eslint-disable no-undef */
+'use strict'
 
-const path = require('path');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   mode: 'development',
-
+  stats: 'errors-only',
   context: __dirname,
   entry: {
-    duckhunt: './main.js',
+    duckhunt: './main.js'
   },
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name].js',
+    hashFunction: 'xxhash64'
+  },
+  experiments: {
+    futureDefaults: true
   },
   devtool: 'source-map',
   module: {
@@ -43,14 +48,20 @@ module.exports = {
       path: false
     },
     modules: ['node_modules'],
-    extensions: ['.js', '.min.js'],
+    extensions: ['.js', '.min.js']
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, 'dist'),
+      directory: path.join(__dirname, 'dist')
+    },
+    client:{
+      overlay:{
+        warnings: false,
+        errors: true
+      }
     },
     port: 8080,
-    open: true,
+    open: true
   },
   cache: {
     type: 'filesystem'
@@ -63,6 +74,6 @@ module.exports = {
           to: 'yolov5n_web_model' // this will be accessible at runtime
         }
       ]
-    }),
-  ],
-};
+    })
+  ]
+}
