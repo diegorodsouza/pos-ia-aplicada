@@ -1,0 +1,92 @@
+<output id="output"></output>
+<!-- https://www.jsdelivr.com/package/npm/markdown -->
+<script src="https://cdn.jsdelivr.net/npm/markdown@0.5.0/lib/markdown.min.js"></script>
+
+<script>
+
+    /*
+    
+    Exemplo de uso do WebAI para criar um assistente de IA que responde a perguntas em português. O código cria uma sessão com o modelo de linguagem, define os parâmetros de temperatura e topK, e envia uma pergunta para o modelo. A resposta é recebida como um stream de tokens, que são concatenados e exibidos no elemento de saída em tempo real.
+
+    Para que funcione, é necessário o uso do navegador Google Chrome e a configuração do WebAI, que pode ser feita seguindo as instruções na documentação oficial do WebAI.
+
+    Para ativar o WebAI no Google Chrome, permita as seguintes flags:
+    
+        chrome://flags/#optimization-guide-on-device-model
+
+        chrome://flags/#prompt-api-for-gemini-nano
+
+    Para verificar as informações do status do download, basta utilizar o console do navegador e digitar:
+
+        LanguageModel.availability();
+
+    Para verificar os requisitos de hardware para o WebAI, acesse:
+
+        chrome://on-device-internals/
+
+    Todos os critérios devem estar como true, exceto "out of retention"
+
+    */
+    const output = document.getElementById('output');
+
+    ; (async () => {
+        const params = await LanguageModel.params()
+        console.log("Language Model Params:", params);
+
+        // Temperature define o nível de "criatividade" da resposta, de acordo com a 
+        // liberdade estatistica que o modelo tem para escolher os próximos tokens. Valores 
+        // mais altos resultam em respostas mais variadas, enquanto valores mais baixos 
+        // tendem a gerar respostas mais conservadoras e previsíveis.
+        const temperature = params.defaultTemperature
+
+        // topK limita o número de tokens considerados para a geração da resposta, 
+        // influenciando a diversidade e relevância das respostas geradas. Valores mais 
+        // baixos resultam em respostas mais focadas e relevantes, enquanto valores mais 
+        // altos permitem uma maior variedade de respostas, mas podem incluir opções menos 
+        // relevantes.
+        const topK = params.defaultTopK
+
+        // initialPrompts são mensagens iniciais que ajudam a configurar o contexto e o 
+        // comportamento do modelo de linguagem. Elas podem incluir instruções, definições 
+        // de papéis ou informações relevantes para orientar a geração de respostas. Essas 
+        // mensagens ajudam a garantir que o modelo entenda o contexto e as expectativas 
+        // para a interação, melhorando a qualidade e a relevância das respostas geradas.
+        const initialPrompts = [
+            {
+                role: 'system',
+                content: `Você é um assistente de IA que responde de forma clara e objetiva.`
+            }
+        ]
+
+        // question poderia ser uma entrada dinâmica do usuário. 
+        // O modelo de linguagem processará essa pergunta e gerará uma resposta com base no
+        // contexto fornecido pelas mensagens iniciais e nos parâmetros definidos em 
+        // initialPrompts, temperature e topK.
+        const question = 'Quem inventou o JavaScript?'
+        
+        output.innerHTML = "Gerando resposta...";
+
+        const session = await LanguageModel.create({
+            expectedInputLanguages: ["pt"],
+            temperature,
+            topK,
+            initialPrompts,
+        })
+
+        const responseStream = await session.promptStreaming([
+            {
+                role: 'user',
+                content: question
+            }
+        ])
+        output.innerHTML = ""
+        let fullText = ""
+        for await (const token of responseStream) {
+            fullText += token;
+            output.innerHTML = markdown.toHTML(fullText);
+
+            // console.log(token)
+        }
+    })();
+
+</script>
