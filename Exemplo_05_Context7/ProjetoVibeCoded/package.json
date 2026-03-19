@@ -1,0 +1,31 @@
+{
+  "name": "exemplo_05_context7",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Demo Next.js + Better Auth + GitHub + SQLite",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-auth": "^1.5.5",
+    "better-sqlite3": "^12.8.0",
+    "next": "^16.2.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@better-auth/cli": "^1.4.21",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.9.3"
+  }
+}
