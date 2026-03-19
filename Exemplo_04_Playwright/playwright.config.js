@@ -9,7 +9,7 @@ module.exports = defineConfig({
   },
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: "https://erickwendel.github.io/vanilla-js-web-app-example/",
+    baseURL: "https://erickwendel.github.io",
     actionTimeout: 5000,
     navigationTimeout: 5000,
     trace: "on-first-retry"
