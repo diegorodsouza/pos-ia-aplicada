@@ -1,4 +1,5 @@
-file_format: 'yaml'
+file_format: yaml
+
 receivers:
   otlp:
     protocols:

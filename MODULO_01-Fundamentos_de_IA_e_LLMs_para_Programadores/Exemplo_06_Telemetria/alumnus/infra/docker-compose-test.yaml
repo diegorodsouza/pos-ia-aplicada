@@ -1,7 +1,11 @@
 include:
-  - ./docker-compos.yaml
+  - ./docker-compose-infra.yaml
 
 services:
+  opentelemetry-collector:
+    ports:
+      - "8889:8889"   # Prometheus exporter metrics only
+
   alumnus-test:
     build: ../_alumnus
     links:
