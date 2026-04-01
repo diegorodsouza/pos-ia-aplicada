@@ -24,7 +24,12 @@ Para a demo, utilizamos um PDF de uma transcrição de uma videoaula sobre LLMs,
 
 Podemos visualizar os resultados para uma das perguntas feitas:
 
+<img width="945" height="570" alt="image" src="https://github.com/user-attachments/assets/989a2643-b582-4389-bfda-8fd0c7a8caa2" />
+
+
 E também a representação gráfica dos dados armazenados no Neo4j, onde cada nó representa um trecho do texto:
+
+<img width="1872" height="950" alt="image" src="https://github.com/user-attachments/assets/6bc402ef-24cb-4691-80e8-766742d9b5f2" />
 
 
 ## Roteiro para execução
