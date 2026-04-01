@@ -18,6 +18,9 @@ Por vim, temos a diferenciação entre ativar o streaming ou não, o que pode se
 
 Enquanto modelos tradicionais como o gpt-oss:20b podem fornecer respostas mais diretas, modelos uncensored como o llama2-uncensored:7b podem oferecer respostas mais detalhadas e sem filtros, o que pode ser útil para determinados tipos de aplicações. A escolha entre um modelo censurado ou uncensored depende do caso de uso específico e dos requisitos de privacidade e segurança. Nesse exemplo, mostramos como ambos os modelos respondem a uma pergunta sobre como criar um aim bot para CS 1.6, destacando as diferenças nas respostas e a importância de escolher o modelo certo para cada situação.
 
+<img width="936" height="241" alt="image" src="https://github.com/user-attachments/assets/f9d7d0e1-14fc-4186-a7fa-dee1deaf74dd" />
+
+
 
 ## Roteiro para execução
 
