@@ -19,26 +19,41 @@ Nesse exemplo, utilizaremos o MCP Context7 para criar um projeto Next.js com Bet
 
 Tela inicial do Projeto Vibe Coded:
 
+<img width="795" height="345" alt="image" src="https://github.com/user-attachments/assets/44c1cfd3-54e9-4335-9b01-9c0e3991f2d5" />
+
+
 Tela de login com GitHub:
 
+<img width="721" height="357" alt="image" src="https://github.com/user-attachments/assets/09dd3cbd-e2a8-4da4-9e82-9826431683a8" />
+
+
 Tela de perfil exibindo informações do usuário autenticado:
+
+<img width="692" height="410" alt="image" src="https://github.com/user-attachments/assets/bf65925b-87eb-48ad-8be0-9b32401c46fe" />
+
+
 
 
 ## Roteiro para execução
 
-1. Instalar as dependências
+1. Acessar a página do projeto
+```
+cd ProjetoVibeCoded
+```
+
+2. Instalar as dependências
 ```
 npm install
 ```
 
-2. Iniciar a aplicação:
+3. Iniciar a aplicação:
 ```
 npm run dev
 ```
 
-3. Abrir no browser `http://localhost:3000`
+4. Abrir no browser `http://localhost:3000`
 
-4. Clicar no botão de login com GitHub e seguir o processo de autenticação
+5. Clicar no botão de login com GitHub e seguir o processo de autenticação
 
 
 
