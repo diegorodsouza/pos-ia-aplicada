@@ -1,4 +1,4 @@
-import tf from "@tensorflow/tfjs-node"
+import tf from "@tensorflow/tfjs"
 
 async function trainModel(inputXs, outputYs) {
   const model = tf.sequential()
@@ -112,9 +112,9 @@ const pessoaTensorNormalizado = [
     1, // cor azul
     0, // cor vermelho
     0, // cor verde
-    1, // localização São Paulo
+    0, // localização São Paulo
     0, // localização Rio
-    0 // localização Curitiba
+    1 // localização Curitiba
   ]
 ]
 

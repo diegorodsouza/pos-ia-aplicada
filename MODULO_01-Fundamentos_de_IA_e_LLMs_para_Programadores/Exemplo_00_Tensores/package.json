@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tensorflow/tfjs-node": "4.22"
-  },
-  "devDependencies": {}
+    "@tensorflow/tfjs": "^4.22.0"
+  }
 }
