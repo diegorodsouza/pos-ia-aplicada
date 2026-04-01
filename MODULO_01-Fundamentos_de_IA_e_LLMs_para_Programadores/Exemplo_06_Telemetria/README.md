@@ -96,7 +96,6 @@ npm install
 
 ```
 npm start
-
 ```
 
 6. Visualizar os dashboards de telemetria no Grafana e validar a presença de métricas, logs e rastreamentos coletados pela aplicação de demonstração em:
@@ -122,7 +121,8 @@ npm start
 
 9. Finalizar os serviços de infra utilizando Docker Compose:
 
-```docker-compose -f docker-compose-infra.yaml down -v
+```
+docker-compose -f docker-compose-infra.yaml down -v
 ```
 
 ## Outros Prompts Interessantes
