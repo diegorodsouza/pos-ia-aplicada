@@ -94,7 +94,8 @@ npm install
 
 5. Iniciar a API para consulta de telemetria e análise de logs:
 
-```npm start
+```
+npm start
 
 ```
 
