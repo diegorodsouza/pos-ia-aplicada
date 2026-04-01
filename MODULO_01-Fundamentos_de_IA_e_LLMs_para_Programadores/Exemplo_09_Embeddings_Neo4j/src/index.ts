@@ -63,9 +63,9 @@ try {
     "o que é hot enconding e quando usar?"
   ]
   for (const question of questions) {
-    console.log(`\n${"=".repeat(50)}`)
+    console.log(`\n${"=".repeat(80)}`)
     console.log(`📌 Pergunta: "${question}"`)
-    console.log(`${"=".repeat(50)}`)
+    console.log(`${"=".repeat(80)}`)
 
     const results = await _neo4jVectorStore.similaritySearch(question, CONFIG.similarity.topK)
 
