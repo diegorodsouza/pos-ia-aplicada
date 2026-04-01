@@ -59,7 +59,9 @@ Nesse exemplo, temos um cenário onde um sistema de monitoramento de telemetria,
 
 ## Demo
 
-A
+Dashboard de erros do Grafana:
+<img width="1846" height="906" alt="image" src="https://github.com/user-attachments/assets/b48c005b-8a01-473d-a1d2-26c3ba38bc03" />
+
 
 ## Roteiro para execução
 
@@ -92,8 +94,8 @@ npm install
 
 5. Iniciar a API para consulta de telemetria e análise de logs:
 
-```npm start
-
+```
+npm start
 ```
 
 6. Visualizar os dashboards de telemetria no Grafana e validar a presença de métricas, logs e rastreamentos coletados pela aplicação de demonstração em:
@@ -119,7 +121,8 @@ npm install
 
 9. Finalizar os serviços de infra utilizando Docker Compose:
 
-```docker-compose -f docker-compose-infra.yaml down -v
+```
+docker-compose -f docker-compose-infra.yaml down -v
 ```
 
 ## Outros Prompts Interessantes
