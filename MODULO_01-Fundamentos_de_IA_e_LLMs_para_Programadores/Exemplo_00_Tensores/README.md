@@ -36,17 +36,16 @@ Terminal:
 
 ## Roteiro para execução
 
-Instale as bibliotecas
-
-```bash
-  npm ci
+1. Instalar as dependências
+```
+npm install
 ```
 
-Execute o projeto
-
-```bash
-  npm start
+2. Iniciar a aplicação:
 ```
+npm start
+```
+
 
 
 ## Métodos em Destaque
