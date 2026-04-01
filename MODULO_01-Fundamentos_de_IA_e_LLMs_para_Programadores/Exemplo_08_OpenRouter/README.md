@@ -15,6 +15,9 @@ Nesse exemplo, exploramos o uso do OpenRouter, uma plataforma que permite a exec
 
 Na demonstração, é feita uma simples pergunta solicitando uma curiosidade sobre LLMs. O OpenRouter processa a requisição e retorna uma resposta gerada pelo modelo de linguagem, exibindo não apenas a resposta, mas também o raciocínio por trás da resposta, o que pode ser útil para entender como o modelo chegou àquela conclusão. Essa funcionalidade é especialmente valiosa para aplicações que exigem transparência e explicações detalhadas sobre as respostas geradas pelos modelos de linguagem.
 
+<img width="936" height="679" alt="image" src="https://github.com/user-attachments/assets/36438913-8018-4365-8dbc-9e52fad0fce3" />
+
+
 
 ## Roteiro para execução
 
