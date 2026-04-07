@@ -24,6 +24,8 @@ export class OpenRouterService {
     async generate(prompt: string): Promise<LLMResponse> {
         const response = await this.client.chat.send({
             models: this.config.models,
+            // normalmente, além do prompt de sistema com as regras de comportamento do modelo, e a mensagem atual do usuário, 
+            // também é possível enviar mensagens anteriores da conversa para que o modelo tenha mais contexto.
             messages: [
                 { role: 'system', content: this.config.systemPrompt },
                 { role: 'user', content: prompt}

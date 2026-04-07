@@ -1,3 +1,4 @@
+// Garante que a variável de ambiente OPENROUTER_API_KEY esteja definida
 console.assert(
     process.env.OPENROUTER_API_KEY,
     'OPENROUTER_API_KEY is not set in env variables'
@@ -21,8 +22,12 @@ export type ModelConfig = {
     }
 }
 
+// Configuração do modelo para o Smart Model Router Gateway
+// com base na documentação da OpenRouter API 
+// https://openrouter.ai/docs/quickstart#using-the-openai-sdk
 export const config: ModelConfig = {
-    apiKey: process.env.OPENROUTER_API_KEY!,
+    // O "!" é usado para garantir que o valor não seja undefined
+    apiKey: process.env.OPENROUTER_API_KEY!, 
     httpReferer: 'http://pos-ia.com',
     xTitle: 'SmartModelRouterGateway',
     port: 3000,
@@ -38,9 +43,9 @@ export const config: ModelConfig = {
     systemPrompt: 'You are a helpful assistant.',
     provider: {
         sort: {
-            by: 'throughput',
-            // by: 'latency',
-            // by: 'price',
+            by: 'throughput', // taxa de processamento do modelo, medida em tokens por segundo
+            // by: 'latency', // tempo de resposta do modelo
+            // by: 'price', // custo do modelo por 1k tokens
             partition: 'none'
         }
     }
