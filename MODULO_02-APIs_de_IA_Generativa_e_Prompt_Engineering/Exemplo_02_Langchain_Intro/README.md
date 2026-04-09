@@ -40,7 +40,7 @@ LangGraph é um framework que permite construir aplicações de IA baseadas em g
 
 ## Demo
 
-O servidor expõe um endpoint `/chat` que recebe uma pergunta e a processa através de um grafo que:
+O servidor cria um fluxo que recebe uma pergunta e a processa através de um grafo que:
 
 1. **Identifica a intenção** do usuário (procura por "upper" ou "lower" na mensagem)
 2. **Roteia para o processamento adequado**:
@@ -49,6 +49,15 @@ O servidor expõe um endpoint `/chat` que recebe uma pergunta e a processa atrav
    - Caso contrário → fallback
 3. **Processa** o texto de acordo com a intenção
 4. **Gera a resposta final** formatando as mensagens
+
+Interface do Usuário através do Langchain:
+<img width="1088" height="912" alt="image" src="https://github.com/user-attachments/assets/9e1156df-005e-4aa7-8678-9c31bd888f1f" />
+
+
+
+Grafo de processos criado no projeto:
+<img width="1068" height="673" alt="image" src="https://github.com/user-attachments/assets/2a206f95-16a1-40fd-b12e-bf3c593e9ae9" />
+
 
 ## Roteiro para execução
 
