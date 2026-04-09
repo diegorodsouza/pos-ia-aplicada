@@ -53,11 +53,8 @@ O servidor cria um fluxo que recebe uma pergunta e a processa através de um gra
 Interface do Usuário através do Langchain:
 <img width="1088" height="912" alt="image" src="https://github.com/user-attachments/assets/9e1156df-005e-4aa7-8678-9c31bd888f1f" />
 
-
-
 Grafo de processos criado no projeto:
 <img width="1068" height="673" alt="image" src="https://github.com/user-attachments/assets/2a206f95-16a1-40fd-b12e-bf3c593e9ae9" />
-
 
 ## Roteiro para execução
 
@@ -75,28 +72,60 @@ LANGCHAIN_TRACING_V2=true
 LANGCHAIN_PROJECT=your-project-name
 ```
 
-3. Servir o grafo localmente com LangGraph Studio para visualização:
+3. Iniciar o servidor em modo desenvolvimento:
+
+```
+npm run dev
+```
+
+4. O servidor estará disponível em `http://localhost:3000`
+
+5. Fazer uma requisição para testar o grafo:
+
+```bash
+curl -X POST http://localhost:3000/chat \
+  -H "Content-Type: application/json" \
+  -d '{ "question": "Convert this to UPPERCASE please" }'
+```
+
+**Resposta esperada (exemplo):**
+
+```json
+"CONVERT THIS TO UPPERCASE PLEASE"
+```
+
+Você pode testar com diferentes inputs:
+
+- `"make this lowercase"` → retorna o texto em minúscula
+- `"What is the capital of France?"` → retorna resposta padrão de fallback
+
+6. **(Opcional) Servir o grafo localmente com LangGraph Studio para visualização:**
 
 ```
 npm run langgraph:serve
 ```
 
-4. Abrir a interface do LangGraph Studio no navegador (geralmente `http://https://smith.langchain.com/studio?baseUrl=http://localhost:2024`)
+7. Abrir a interface do LangGraph Studio no navegador (geralmente `http://https://smith.langchain.com/studio?baseUrl=http://localhost:2024`)
 
-5. Testar o grafo na interface do LangGraph Studio:
+8. Testar o grafo na interface do LangGraph Studio:
    - Clique no botão **"Messages"** para enviar mensagens de teste
-    - Envie mensagens como `"Please uppercase this text"` ou ` "Please lowercase THIS TEXT"` ou `"What is the capital of France?"` para testar os diferentes fluxos
-   - Observa a execução visual do grafo em tempo real
+   - Envie mensagens como `"Please uppercase this text"` ou `"Please lowercase THIS TEXT"` ou `"What is the capital of France?"` para testar os diferentes fluxos
+   - Observe a execução visual do grafo em tempo real
    - Acompanhe o estado em cada node conforme o processamento avança
    - Verifique os outputs e as transformações em cada etapa
    - Explore diferentes inputs para testar os diferentes fluxos (uppercase, lowercase, fallback)
 
-6. **(Opcional) Executar testes E2E automatizados:**
+9. **(Opcional) Executar testes E2E automatizados:**
 
 ```
 npm test
 ```
 
+Ou em modo watch para desenvolvimento:
+
+```
+npm run test:dev
+```
 
 ## Funcionalidades
 
