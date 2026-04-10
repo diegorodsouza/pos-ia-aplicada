@@ -26,7 +26,7 @@ describe("Medical Appointment System - E2E Tests", async () => {
     assert.equal(response.statusCode, 200)
     const body = JSON.parse(response.body)
     assert.equal(body.intent, "schedule")
-    // assert.equal(body.success, true);
+    assert.equal(body.actionSuccess, true)
   })
 
   it("Cancel appointment - Success", async () => {
