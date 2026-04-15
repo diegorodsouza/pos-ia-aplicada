@@ -1,297 +1,216 @@
-# Prompt Chaining Article Generator
+# Medical Appointment - Agendamento e Cancelamento com LangGraph
 
-Demonstration of **prompt engineering** with LangChain using structured outputs and conditional edges to generate high-quality technical articles through multiple AI agents reviewing each other.
+Neste exemplo, construimos um fluxo conversacional para **agendar** e **cancelar** consultas medicas usando LangGraph, Fastify e OpenRouter.
 
-## 🎯 Goals
+A aplicacao recebe uma pergunta em linguagem natural, identifica a intencao do usuario, executa a acao correspondente (agendar/cancelar) e devolve uma resposta amigavel ao paciente.
 
-This project exemplifies:
-- **Structured Outputs**: Using Zod schemas to prevent hallucinations
-- **Prompt Chaining**: Three-stage pipeline with quality feedback loop
-- **Minimal Code**: Let AI agents review each other instead of complex logic
-- **Real API Testing**: Integration tests with actual OpenRouter calls
-- **Quality Assurance**: Automatic retry until score ≥ 8/10
+## Stack
 
-## Features
+**Server:** Node.js, TypeScript (executado com Node), Fastify, LangGraph, LangChain, OpenRouter
 
-- 🎨 **3-Stage Pipeline**: Plan → Draft → Review (with quality loop)
-- 📊 **Structured Validation**: Zod schemas at every step
-- 🔄 **Conditional Edges**: Retry review until quality threshold met
-- 📝 **Template System**: JSON prompts with variable interpolation
-- 🧪 **Real API Tests**: No mocks, actual LLM calls
-- 📁 **Organized Outputs**: `outputs/timestamp-topic/output.md`
+## Libs em Destaque
 
-## Architecture
+`@langchain/langgraph` para orquestracao por grafo (nodes, edges e roteamento condicional)
+`langchain` para mensagens e criacao de agentes com resposta estruturada
+`@langchain/openai` para integrar com endpoint OpenRouter
+`zod` para schema de estado e validacao de saida estruturada
+`fastify` para API HTTP (`POST /chat`)
 
-### LangGraph Workflow
+## Estrutura do Projeto
 
-```
-START → plan → draft → review ⟲ (if score < 8) → END
-         ↓       ↓       ↓
-      outline  article  final + scores
-```
+- `src/index.ts` - Entry point do servidor Fastify
+- `src/server.ts` - Rota `/chat` que invoca o grafo
+- `src/config.ts` - Configuracao de modelos e chave da OpenRouter
+- `src/graph/graph.ts` - Definicao do StateGraph e roteamento por intencao
+- `src/graph/factory.ts` - Factory que injeta dependencias no grafo
+- `src/graph/nodes/identifyIntentNode.ts` - Classifica intencao e extrai dados da consulta
+- `src/graph/nodes/schedulerNode.ts` - Agenda consulta no servico local
+- `src/graph/nodes/cancellerNode.ts` - Cancela consulta no servico local
+- `src/graph/nodes/messageGeneratorNode.ts` - Gera mensagem final para o paciente
+- `src/services/openRouterService.ts` - Wrapper de chamada ao modelo com structured output
+- `src/services/appointmentService.ts` - Regras de negocio em memoria (profissionais e consultas)
+- `src/prompts/v1/identifyIntent.ts` - Prompt de classificacao de intencao
+- `src/prompts/v1/messageGenerator.ts` - Prompt de geracao de resposta ao usuario
+- `tests/router.e2e.test.ts` - Testes E2E do endpoint `/chat`
+- `langgraph.json` - Config para execucao no LangGraph CLI/Studio
 
-### Project Structure
+## O que este exemplo demonstra
 
-```
-src/
-  ├── config.ts                 # Configuration with env vars
-  ├── index.ts                  # CLI entry point
-  ├── graph/
-  │   ├── graph.ts             # StateGraph with conditional edges
-  │   ├── factory.ts           # Graph builder
-  │   └── nodes/
-  │       ├── planNode.ts      # Outline generation (Zod validated)
-  │       ├── draftNode.ts     # Article drafting
-  │       └── reviewNode.ts    # Quality scoring & improvement
-  ├── services/
-  │   └── openrouter-service.ts  # LLM client
-  └── utils/
-      └── prompt-loader.ts     # Template loading & interpolation
-prompts/
-  └── v1/
-      ├── plan.json           # Outline generation prompt
-      ├── draft.json          # Section writing prompt
-      └── review.json         # Quality review prompt
-tests/
-  └── article-generator.test.ts  # Real API integration test
-```
-  │   ├── graph.ts          # StateGraph definition with co-located types
-  │   ├── factory.ts        # Graph creation factory
-  │   └── nodes/            # LangGraph nodes (workflow steps)
-  │       ├── outline.node.ts    # Generate article structure + parsing
-  │       ├── research.node.ts   # Research sections in parallel
-  │       ├── write.node.ts      # Write sections + assembly
-  │       └── review.node.ts     # Polish final article
-  ├── services/
-  │   └── openrouter-service.ts  # OpenRouter SDK wrapper (implements LLMClient)
-  └── utils/
-      └── prompt-loader.ts  # Load prompts from template files
+1. **Classificacao de intencao com LLM**: identifica se o usuario quer agendar, cancelar ou outro assunto.
+2. **Extracao estruturada**: retorna campos como `professionalId`, `datetime`, `patientName` e `reason`.
+3. **Roteamento condicional em grafo**: direciona para `schedule`, `cancel` ou `message`.
+4. **Separacao de responsabilidades**: prompts, regra de negocio, orquestracao e API desacoplados.
+5. **Resposta final humanizada**: mensagem clara, empatica e contextual para cada cenario.
 
-prompts/                    # Prompt templates with variables
-  ├── outline.txt           # Section structure generation
-  ├── research.txt          # Research individual sections
-  ├── write-section.txt     # Write section content
-  └── review.txt            # Review and improve
+## Fluxo do Grafo
 
-tests/
-  └── article-generator.test.ts  # Graph workflow tests
+```text
+START -> identifyIntent -> (schedule | cancel | message) -> message -> END
 ```
 
-## Installation
+### Roteamento
+
+- Se `intent = schedule`: tenta agendar consulta e depois gera mensagem de confirmacao/erro.
+- Se `intent = cancel`: tenta cancelar consulta e depois gera mensagem de confirmacao/erro.
+- Se `intent = unknown` ou houver erro na identificacao: vai direto para `message` com orientacao ao usuario.
+
+## Roteiro para Execucao
+
+1. Instalar dependencias:
 
 ```bash
 npm install
 ```
 
-## Configuration
-
-Create `.env` file:
+2. Criar `.env` baseado em `.env.example`:
 
 ```env
-# OpenRouter Configuration (required)
-OPENROUTER_API_KEY=sk-or-v1-...
-OPENROUTER_MODEL=anthropic/claude-3.5-sonnet
-OPENROUTER_HTTP_REFERER=https://your-site.com
-OPENROUTER_X_TITLE=Article Generator
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 
-# Model Configuration
-MODEL_TIMEOUT=60000
-MODEL_MAX_RETRIES=3
-
-# Article Configuration
-MIN_SECTIONS=3
-MAX_SECTIONS=8
-TARGET_WORDS_PER_SECTION=200
-
-# Logging
-LOG_LEVEL=info
+LANGSMITH_API_KEY=your_langsmith_api_key_here
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=03-medical-appointment
 ```
 
-## Usage
-
-### Generate Article
+3. Rodar em desenvolvimento:
 
 ```bash
-# Using topic flag
-npm run generate -- --topic "Test-Driven Development in TypeScript"
-
-# With custom output path
-npm run generate -- --topic "Docker Best Practices" --output my-article.md
+npm run dev
 ```
 
-### Run Tests
+4. Servidor disponivel em:
+
+```text
+http://localhost:3000
+```
+
+5. Testar endpoint `/chat`:
 
 ```bash
-npm test
+curl -X POST http://localhost:3000/chat \
+	-H "Content-Type: application/json" \
+	-d '{"question":"Ola, sou Maria Santos e quero agendar uma consulta com Dr. Alicio da Silva para amanha as 16h para um check-up regular"}'
 ```
 
-## How It Works
+Exemplo de resposta esperada (campos principais):
 
-### 1. Outline Node
-
-Generates article structure:
-- Title
-- Introduction
-- Sections with key points
-- Conclusion
-
-**State Updates**: `outline`, `currentStep`
-
-### 2. Research Node
-
-Researches all sections **in parallel**:
-```typescript
-const researchPromises = sections.map(section =>
-  llmClient.generate(researchPrompt)
-);
-const results = await Promise.all(researchPromises);
-```
-
-**State Updates**: `researchResults`, `currentStep`
-
-### 3. Write Sections Node
-
-Writes each section **sequentially** using research:
-- Loops through sections
-- Uses section research + key points
-- Calculates word count
-- Builds draft article
-
-**State Updates**: `sections`, `draftArticle`, `totalWords`, `currentStep`
-
-### 4. Review Node
-
-Reviews and improves final article:
-- Checks tone and style
-- Improves transitions
-- Ensures consistency
-- Polishes language
-
-**State Updates**: `finalArticle`, `currentStep`
-
-## LangGraph Concepts
-
-### StateGraph
-
-Defines the workflow with typed state:
-```typescript
-const ArticleStateAnnotation = Annotation.Root({
-  topic: Annotation<string>,
-  outline: Annotation<any>,
-  researchResults: Annotation<string[]>,
-  sections: Annotation<any[]>,
-  draftArticle: Annotation<string>,
-  finalArticle: Annotation<string>,
-  totalWords: Annotation<number>,
-  currentStep: Annotation<string>,
-});
-```
-
-### Node Functions
-
-Each node receives state and returns partial state updates:
-```typescript
-export const createOutlineNode = (llmClient: LLMClient) => {
-  return async (state: GraphState): Promise<Partial<GraphState>> => {
-    const outline = await generateOutline(state.topic);
-    return {
-      outline,
-      currentStep: 'outline_completed',
-    };
-  };
-};
-```
-
-### Graph Construction
-
-```typescript
-const workflow = new StateGraph({ stateSchema: ArticleStateAnnotation })
-  .addNode('generateOutline', outlineNode)
-  .addNode('conductResearch', researchNode)
-  .addNode('writeSections', writeSectionsNode)
-  .addNode('reviewArticle', reviewNode)
-  .addEdge(START, 'generateOutline')
-  .addEdge('generateOutline', 'conductResearch')
-  .addEdge('conductResearch', 'writeSections')
-  .addEdge('writeSections', 'reviewArticle')
-  .addEdge('reviewArticle', END);
-
-return workflow.compile();
-```
-
-## Testing Strategy
-
-Uses **MockLLMClient** with deterministic responses:
-
-```typescript
-class MockLLMClient implements LLMClient {
-  responses: Map<string, string>;
-
-  async generate(prompt: string): Promise<string> {
-    if (prompt.includes('outline')) return mockOutline;
-    if (prompt.includes('Research')) return mockResearch;
-    if (prompt.includes('Write')) return mockSection;
-    if (prompt.includes('Review')) return mockReview;
-  }
+```json
+{
+  "intent": "schedule",
+  "actionSuccess": true,
+  "messages": [{ "content": "...mensagem de confirmacao..." }]
 }
 ```
 
-Tests verify:
-- ✅ Complete article generation through graph
-- ✅ Multiple LLM calls in chain
-- ✅ Correct state flow through all nodes
-- ✅ Word count calculation
+6. **(Opcional) Servir o grafo localmente com LangGraph Studio para visualização:**
 
-## Key Patterns
-
-### Single Responsibility Principle
-
-- **Nodes**: One transformation per node
-- **Services**: LLM interactions only
-- **Utils**: Reusable helpers (prompt loading)
-- **Config**: Environment management
-
-### Dependency Injection
-
-Nodes receive dependencies as parameters:
-```typescript
-createOutlineNode(llmClient: LLMClient, config: ArticleConfig)
+```
+npm run langgraph:serve
 ```
 
-### Immutable State
+7. Abrir a interface do LangGraph Studio no navegador (geralmente `http://https://smith.langchain.com/studio?baseUrl=http://localhost:2024`)
 
-Nodes return new state objects, never mutate:
-```typescript
-return {
-  ...state,
-  outline: newOutline,
-};
+8. Testar o grafo na interface do LangGraph Studio:
+   - Clique no botão **"Messages"** para enviar mensagens de teste
+   - Envie mensagens como `"Me chamo André e gostaria de agendar uma consulta com o Dr. Alicio para amanhã as 16h"` ou `"Sou o André e gostaria de cancelar a consulta de amanhã as 16h com o Alicio"` para testar os diferentes fluxos
+   - Observe a execução visual do grafo em tempo real
+   - Acompanhe o estado em cada node conforme o processamento avança
+   - Verifique os outputs e as transformações em cada etapa
+   - Explore diferentes inputs para testar os diferentes fluxos (uppercase, lowercase, fallback)
+
+9. **(Opcional) Executar testes E2E automatizados:**
+
+```
+npm test
 ```
 
-### Prompt Templates
+Ou em modo watch para desenvolvimento:
 
-Prompts stored in files, not code:
+```
+npm run test:dev
+
+O projeto possui cenarios de:
+
+- agendamento com sucesso
+- cancelamento com sucesso
+
+## Funcionalidades
+
+- ✅ API HTTP para conversacao (`POST /chat`)
+- ✅ Identificacao de intencao com resposta estruturada
+- ✅ Extracao de dados de consulta (medico, horario, paciente)
+- ✅ Agendamento e cancelamento em servico de dominio
+- ✅ Mensagens finais personalizadas para sucesso/erro
+- ✅ Fluxo modelado com LangGraph + edges condicionais
+- ✅ Testes E2E cobrindo o caminho principal
+
+## Metodos em Destaque
+
+### Metodo: `buildAppointmentGraph()`
+
+Monta o StateGraph com nodes e transicoes:
+
 ```typescript
-const prompt = await PromptLoader.load('outline', {
-  topic: state.topic,
-  minSections: config.minSections,
-  maxSections: config.maxSections,
-});
+const workflow = new StateGraph({ stateSchema: AppointmentStateAnnotation })
+  .addNode("identifyIntent", createIdentifyIntentNode(llmClient))
+  .addNode("schedule", createSchedulerNode(appointmentService))
+  .addNode("cancel", createCancellerNode(appointmentService))
+  .addNode("message", createMessageGeneratorNode(llmClient))
+  .addEdge(START, "identifyIntent")
+  .addConditionalEdges(
+    "identifyIntent",
+    (state) => {
+      if (state.error || !state.intent || state.intent === "unknown") return "message"
+      return state.intent
+    },
+    {
+      schedule: "schedule",
+      cancel: "cancel",
+      message: "message"
+    }
+  )
+  .addEdge("schedule", "message")
+  .addEdge("cancel", "message")
+  .addEdge("message", END)
 ```
 
-## Learning Objectives
+### Metodo: `POST /chat`
 
-1. **Prompt Chaining**: Build complex outputs from simple steps
-2. **LangGraph**: State management in LLM workflows
-3. **Parallel Execution**: Research sections concurrently
-4. **Sequential Processing**: Write sections in order
-5. **State Transitions**: Track progress through workflow
-6. **Testing**: Mock LLMs for deterministic tests
+Recebe pergunta em linguagem natural e invoca o grafo com `HumanMessage`:
 
-## Node Version
+```typescript
+const response = await graph.invoke({
+  messages: [new HumanMessage(question)]
+})
+```
 
-Requires Node.js >= 22.0.0 for TypeScript strip-types support.
+### Metodo: `generateStructured()`
 
-## License
+No servico OpenRouter, encapsula chamada ao modelo com `responseFormat` baseado em Zod para obter saida validada:
 
-MIT
+```typescript
+const agent = createAgent({
+  model: this.llmClient,
+  tools: [],
+  responseFormat: providerStrategy(schema)
+})
+```
+
+## LangGraph Studio (Opcional)
+
+Para visualizar o grafo localmente:
+
+```bash
+npm run langgraph:serve
+```
+
+Configuracao em `langgraph.json`:
+
+- graph id: `medical_appointments`
+- entrypoint: `./src/graph/factory.ts:graph`
+
+## Observacoes
+
+- O servico de consultas usa armazenamento em memoria (`appointmentService.ts`) para fins didaticos.
+- Em producao, substituir por persistencia real (banco de dados) e controles de concorrencia.
+- O projeto exige Node.js com suporte a execucao direta de TypeScript conforme definido em `package.json`.
