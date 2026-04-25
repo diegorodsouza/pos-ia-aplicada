@@ -32,11 +32,21 @@ export function buildChatGraph(
 ) {
   const graph = new StateGraph(ChatStateAnnotation)
     .addNode('chat', createChatNode(llmClient))
+
+    // Preferências do usuário são informações extraídas durante a conversa que podem ser úteis para personalizar recomendações 
+    // musicais, como gêneros favoritos, artistas preferidos, ou até mesmo o humor atual do usuário. Armazenar essas preferências 
+    // permite que o sistema aprenda e se adapte ao longo do tempo, oferecendo sugestões mais relevantes e personalizadas em 
+    // interações futuras.
     .addNode('savePreferences', createSavePreferencesNode())
+
+    // A função de sumarização é importante para manter o contexto da conversa gerenciável, especialmente em interações longas.
+    // Ela ajuda a condensar as informações essenciais, permitindo que o modelo de linguagem se concentre nos pontos mais relevantes 
+    // para gerar respostas mais precisas e coerentes, sem perder o fio da conversa.
     .addNode('summarize', createSummarizationNode(llmClient))
 
     .addEdge(START, 'chat')
 
+    // Aqui avaliamos se precisamos extrair as preferências do usuário ou resumir a conversa antes de continuar
     .addConditionalEdges(
       'chat',
       routeAfterChat,
@@ -47,6 +57,8 @@ export function buildChatGraph(
       }
     )
 
+    // Após salvar as preferências, podemos optar por resumir a conversa para atualizar o contexto ou seguir direto para o 
+    // fim da interação
     .addConditionalEdges(
       'savePreferences',
       routeAfterSavePreferences,
