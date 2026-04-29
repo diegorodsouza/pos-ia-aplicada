@@ -1,4 +1,4 @@
-# Exemplo 05 - Prompt Injection
+# Segurança em IA Generativa: Detecção e Prevenção de Prompt Injection com Guardrails
 
 ## Objetivo
 
