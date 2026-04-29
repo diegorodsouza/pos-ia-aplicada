@@ -10,5 +10,11 @@
     "role": "member",
     "permissions": [],
     "displayName": "Ana Neri"
+  },
+  "guest": {
+    "username": "guest",
+    "role": "guest",
+    "permissions": [],
+    "displayName": "Guest User"
   }
 }
