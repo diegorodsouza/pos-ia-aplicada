@@ -27,6 +27,7 @@ export class Neo4jService {
     return this.graph;
   }
 
+  // Recupera o esquema do banco de dados para fornecer contexto ao modelo na geração da query Cypher
   async getSchema(): Promise<string> {
     try {
       const graph = await this.getGraph();
@@ -37,6 +38,9 @@ export class Neo4jService {
     }
   }
 
+  // O explain é uma forma nativa do Neo4j de validar uma query Cypher, verificando se a sintaxe está correta e 
+  // se a query pode ser executada, sem realmente executar a query - isso é útil para evitar erros de execução e 
+  // para fornecer feedback ao modelo na etapa de correção da query
   async validateQuery(query: string): Promise<boolean> {
     try {
       const graph = await this.getGraph();
@@ -48,6 +52,7 @@ export class Neo4jService {
     }
   }
 
+  // Executa a query Cypher gerada e retorna os resultados para o modelo
   async query<T = any>(cypherQuery: string, parameters?: any): Promise<T[]> {
     try {
       const graph = await this.getGraph();
@@ -59,6 +64,8 @@ export class Neo4jService {
     }
   }
 
+  // Método util para limpar o banco de dados durante o desenvolvimento e testes, garantindo que cada execução do 
+  // fluxo de trabalho
   async clearDatabase(): Promise<void> {
     try {
       const graph = await this.getGraph();
@@ -70,6 +77,8 @@ export class Neo4jService {
     }
   }
 
+  // Necessário para fechar a conexão com o banco de dados quando a aplicação for encerrada, evitando conexões 
+  // pendentes e garantindo que os recursos sejam liberados adequadamente
   async close(): Promise<void> {
     try {
       // Wait for any pending initialization
