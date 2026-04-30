@@ -14,6 +14,7 @@ export function createQueryPlannerNode(llmClient: OpenRouterService) {
         return {
           ...state,
           error,
+          // Em caso de erro na análise, assumimos que a questão não é complexa para evitar bloqueios no fluxo
           isMultiStep: false
         }
       }

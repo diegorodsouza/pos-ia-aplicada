@@ -11,6 +11,8 @@ console.log(`Server is running on http://0.0.0.0:4000`)
 //  --data '{"question": "upper"}' \
 //  localhost:4000/chat
 
+// Testando a aplicação com uma requisição simulada para garantir que tudo está funcionando corretamente
+// É possivel substituir a pergunta por outras questões, simples ou complexas, para testar diferentes cenários
 app
   .inject({
     method: "POST",

@@ -21,12 +21,18 @@ export function createCypherCorrectionNode(llmClient: OpenRouterService, neo4jSe
 
       console.log(`✅ Query corrected: ${data?.explanation}`)
 
+      // Atualizamos a query no estado com a query corrigida, e resetamos a flag de necessidade de correção para
+      // que a node de execução de Cypher tente executar a query corrigida
       return {
         ...state,
         query: data?.correctedQuery,
+        // Armazenamos a query original para referência futura, caso ainda não esteja armazenada
         originalQuery: state.originalQuery ?? state.query,
+        // Incrementamos o número de tentativas de correção para monitoramento e controle de loops de correção
         correctionAttempts: (state.correctionAttempts ?? 0) + 1,
+        // Resetamos a flag de necessidade de correção para que a próxima execução tente rodar a query corrigida,
         validationError: undefined,
+        // Limpamos o erro de validação anterior, já que estamos tentando corrigir a query
         needsCorrection: false
       }
     } catch (error: any) {

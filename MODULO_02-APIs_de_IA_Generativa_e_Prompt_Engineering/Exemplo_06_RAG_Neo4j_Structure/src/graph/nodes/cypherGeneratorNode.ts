@@ -5,16 +5,22 @@ import { CypherQuerySchema, getSystemPrompt, getUserPromptTemplate } from "../..
 import { SALES_CONTEXT } from "../../prompts/v1/salesContext.ts"
 
 function getCurrentStepQuestion(state: GraphState) {
+  // Se a questão não for complexa o suficiente para ser decomposta,
+  // ou se não houver subquestões,
+  // ou se o currentStep for indefinido, então não há questão atual para responder
   if (!state.isMultiStep || !state.subQuestions?.length || state.currentStep === undefined) {
     return null
   }
 
+  // Se o currentStep for maior ou igual ao número de subquestões, então todas as subquestões já foram
+  // respondidas, e não há questão atual para responder
   if (state.currentStep >= state.subQuestions.length) {
     return null
   }
 
   return {
     question: state.subQuestions[state.currentStep],
+    // Incrementa o currentStep para a próxima questão
     stepNumber: state.currentStep + 1
   }
 }
@@ -42,8 +48,10 @@ export function createCypherGeneratorNode(llmClient: OpenRouterService, neo4jSer
           error: `Failed to generate query: ${error ?? "Unknown error"}`
         }
       }
-
       console.log(`✅ Generated Cypher query: ${data?.query}`)
+
+      // Se a questão é complexa e possui subquestões, passamos a query gerada para o array de subQueries, e o
+      // processo continua para a próxima subquestão
       if (state.isMultiStep && state.subQueries?.length) {
         return {
           query: data?.query,
@@ -51,6 +59,8 @@ export function createCypherGeneratorNode(llmClient: OpenRouterService, neo4jSer
         }
       }
 
+      // Se a questão não é complexa, ou se já estamos na última subquestão, a query gerada é a query final para o
+      // processo de execução
       return {
         query: data?.query
       }
