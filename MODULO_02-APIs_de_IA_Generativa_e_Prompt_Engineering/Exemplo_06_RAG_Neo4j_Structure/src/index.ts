@@ -1,9 +1,9 @@
-import { createServer } from './server.ts';
+import { createServer } from "./server.ts"
 
-const app = createServer();
+const app = createServer()
 
-await app.listen({ port: 4000, host: '0.0.0.0' });
-console.log(`Server is running on http://0.0.0.0:4000`);
+await app.listen({ port: 4000, host: "0.0.0.0" })
+console.log(`Server is running on http://0.0.0.0:4000`)
 
 //  curl \
 //  -X POST \
@@ -11,21 +11,21 @@ console.log(`Server is running on http://0.0.0.0:4000`);
 //  --data '{"question": "upper"}' \
 //  localhost:4000/chat
 
-
-// Testando a aplicação com uma requisição simulada para garantir que tudo está funcionando corretamente 
-// É possivel substituir a pergunta por outras questões, simples ou complexas, para testar diferentes cenários
-app.inject({
-    method: 'POST',
-    url: '/sales',
+app
+  .inject({
+    method: "POST",
+    url: "/sales",
     payload: {
-        question: 'Which courses are commonly bought together?', // complex
-        // question: "Find courses that students typically purchase after 'Machine Learning em Navegadores'", // complex
-        // question: 'Show me the revenue distribution across all courses',
-        // question: 'Which users have progressed over 80%?',
-        // question: 'What is the average completion rate for the "Data Science" course?', // simple
-    },
-}).then(response => {
-    console.log(JSON.parse(response.body)?.answer);
-}).catch(error => {
-    console.error('Error making test request:', error);
-})
+      question: "Which courses are commonly bought together?" // complex
+      // question: "Find courses that students typically purchase after 'Machine Learning em Navegadores'", // complex
+      // question: 'Show me the revenue distribution across all courses',
+      // question: 'Which users have progressed over 80%?',
+      // question: 'Quantos cursos tem na academia?', // simple
+    }
+  })
+  .then((response) => {
+    console.log(JSON.parse(response.body)?.answer)
+  })
+  .catch((error) => {
+    console.error("Error making test request:", error)
+  })

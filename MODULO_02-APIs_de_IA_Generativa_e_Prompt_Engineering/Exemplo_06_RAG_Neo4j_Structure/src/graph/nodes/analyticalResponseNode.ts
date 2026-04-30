@@ -17,7 +17,6 @@ async function handleErrorResponse(state: GraphState, llmClient: OpenRouterServi
 
   if (error) {
     return {
-      ...state,
       messages: [new AIMessage(`An error ocurred: ${error}`)],
       error,
       answer: `An error ocurred: ${error}`,
@@ -26,7 +25,6 @@ async function handleErrorResponse(state: GraphState, llmClient: OpenRouterServi
   }
 
   return {
-    ...state,
     messages: [new AIMessage(data?.answer!)],
     answer: data?.answer,
     followUpQuestions: data?.followUpQuestions
@@ -40,7 +38,6 @@ async function handleSuccessResponse(state: GraphState, llmClient: OpenRouterSer
   ) {
     console.log(`📊 Synthesizing ${state.subResults!.length} step results...`)
     const stepsData = state.subResults!.map((results, index) => ({
-      ...state,
       stepNumber: index + 1,
       question: state.subQuestions![index],
       query: state.subQueries![index],
@@ -57,14 +54,12 @@ async function handleSuccessResponse(state: GraphState, llmClient: OpenRouterSer
   if (error) {
     console.error("Failed to generate analytical response")
     return {
-      ...state,
       error: `Reponse generation faild: ${error ?? "Unknown error"}`
     }
   }
 
   console.log("✅ Generated analytical response")
   return {
-    ...state,
     messages: [new AIMessage(data?.answer!)],
     answer: data?.answer,
     followUpQuestions: data?.followUpQuestions

@@ -5,23 +5,17 @@ import { CypherQuerySchema, getSystemPrompt, getUserPromptTemplate } from "../..
 import { SALES_CONTEXT } from "../../prompts/v1/salesContext.ts"
 
 function getCurrentStepQuestion(state: GraphState) {
-  // Se a questão não for complexa o suficiente para ser decomposta,
-  // ou se não houver subquestões,
-  // ou se o currentStep for indefinido, então não há questão atual para responder
   if (!state.isMultiStep || !state.subQuestions?.length || state.currentStep === undefined) {
     return null
   }
 
-  // Se o currentStep for maior ou igual ao número de subquestões, então todas as subquestões já foram
-  // respondidas, e não há questão atual para responder
   if (state.currentStep >= state.subQuestions.length) {
     return null
   }
 
   return {
-    ...state,
     question: state.subQuestions[state.currentStep],
-    stepNumber: state.currentStep + 1 // Incrementa o currentStep para a próxima questão
+    stepNumber: state.currentStep + 1
   }
 }
 
@@ -30,7 +24,6 @@ export function createCypherGeneratorNode(llmClient: OpenRouterService, neo4jSer
     try {
       const stepInfo = getCurrentStepQuestion(state)
       const targetQuestion = stepInfo?.question ?? state.question!
-
       if (stepInfo) {
         const totalSteps = state.subQuestions?.length ?? 0
         console.log(`🤖 Generating Cypher query for step ${stepInfo.stepNumber}/${totalSteps}: "${targetQuestion}"`)
@@ -39,41 +32,30 @@ export function createCypherGeneratorNode(llmClient: OpenRouterService, neo4jSer
       }
 
       const schema = await neo4jService.getSchema()
-
       const systemPrompt = await getSystemPrompt(schema, SALES_CONTEXT)
-
-      const userPrompt = getUserPromptTemplate(targetQuestion)
+      const userPrompt = await getUserPromptTemplate(targetQuestion)
 
       const { data, error } = await llmClient.generateStructured(systemPrompt, userPrompt, CypherQuerySchema)
 
-      const generatedQuery = data?.query.trim()
-      if (error || !generatedQuery) {
+      if (error) {
         return {
-          error: `Failed to generate query: ${error ?? "Unknown error"}. Generated query: ${generatedQuery}`
+          error: `Failed to generate query: ${error ?? "Unknown error"}`
         }
       }
 
-      console.log(`✅ Generated Cypher query:\n${generatedQuery}`)
-
-      // Se a questão é complexa e possui subquestões, passamos a query gerada para o array de subQueries, e o
-      // processo continua para a próxima subquestão
+      console.log(`✅ Generated Cypher query: ${data?.query}`)
       if (state.isMultiStep && state.subQueries?.length) {
         return {
-          ...state,
-          query: generatedQuery,
-          subQueries: [...state.subQueries, generatedQuery ?? ""]
+          query: data?.query,
+          subQueries: [...state.subQueries, data?.query ?? ""]
         }
       }
 
-      // Se a questão não é complexa, ou se já estamos na última subquestão, a query gerada é a query final para o
-      // processo de execução
       return {
-        ...state,
-        isMultiStep: false,
-        query: generatedQuery
+        query: data?.query
       }
     } catch (error: any) {
-      console.error(`❌ Failed to generate query: ${error.message}`)
+      console.error("Error generating Cypher query:", error.message)
       return {
         ...state,
         error: `Failed to generate query: ${error.message}`

@@ -7,28 +7,23 @@ export function createQueryPlannerNode(llmClient: OpenRouterService) {
     try {
       const systemPrompt = getSystemPrompt()
       const userPrompt = getUserPromptTemplate(state.question!)
-
-      const { data, error } = await llmClient.generateStructured(userPrompt, systemPrompt, QueryAnalysisSchema)
+      const { data, error } = await llmClient.generateStructured(systemPrompt, userPrompt, QueryAnalysisSchema)
 
       if (error) {
-        console.error("❌ Error analyzing query:", error)
+        console.log("⚠️  Failed to analyze query, assuming simple")
         return {
           ...state,
           error,
-          isMultiStep: false // Em caso de erro na análise, assumimos que a questão não é complexa para evitar bloqueios no fluxo
+          isMultiStep: false
         }
       }
 
       if (data?.requiresDecomposition && !!data.subQuestions?.length) {
-         const subQuestionsFormatted = data.subQuestions
-          .map((q: string, i: number) => `\n   ${i + 1}. ${q}`)
-          .join('');
+        const subQuestionsFormatted = data.subQuestions.map((q: string, i: number) => `\n   ${i + 1}. ${q}`).join("")
 
-
-        console.log(`🔍 Complex query: Sub-questions ( ${data.subQuestions.length} ):\n${subQuestionsFormatted}`)
+        console.log(`📊 Complex query - ${data.subQuestions.length} steps:${subQuestionsFormatted}`)
 
         return {
-          ...state,
           isMultiStep: true,
           subQuestions: data.subQuestions,
           currentStep: 0,
