@@ -25,6 +25,9 @@ function getCurrentStepQuestion(state: GraphState) {
   }
 }
 
+// Terceira etapa do fluxo
+// Gerar a query Cypher para a questão atual, que pode ser a questão principal (para questões simples) ou a
+// subquestão atual (para questões complexas), usando o esquema do banco de dados para fornecer contexto ao modelo
 export function createCypherGeneratorNode(llmClient: OpenRouterService, neo4jService: Neo4jService) {
   return async (state: GraphState): Promise<Partial<GraphState>> => {
     try {

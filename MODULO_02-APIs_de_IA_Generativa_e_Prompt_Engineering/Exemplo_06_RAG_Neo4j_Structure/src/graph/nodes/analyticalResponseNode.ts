@@ -93,6 +93,11 @@ async function handleNoResultsResponse(state: GraphState, llmClient: OpenRouterS
   }
 }
 
+// Sexta e última etapa do fluxo
+// Gerar a resposta analítica final para o usuário com base nos resultados da query executada, e fornecer sugestões de
+// perguntas de acompanhamento para incentivar a exploração adicional dos dados - esta etapa é crucial para fechar o
+// loop de feedback entre o modelo, o banco de dados e o usuário, garantindo que o modelo não apenas forneça uma
+// resposta, mas também oriente o usuário sobre como continuar explorando os dados para obter insights adicionais
 export function createAnalyticalResponseNode(llmClient: OpenRouterService) {
   return async (state: GraphState): Promise<Partial<GraphState>> => {
     try {

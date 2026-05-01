@@ -2,6 +2,10 @@ import { getSystemPrompt, getUserPromptTemplate, QueryAnalysisSchema } from "../
 import { OpenRouterService } from "../../services/openrouterService.ts"
 import type { GraphState } from "../graph.ts"
 
+// Segunda etapa do fluxo
+// Analisar a questão para determinar se é uma questão simples, que pode ser respondida com uma única query Cypher,
+// ou se é uma questão complexa, que precisa ser decomposta em subquestões e múltiplas queries Cypher
+// Para decidir, o modelo usa a IA com base na necessidade de agregar multiplos escopos (complexa) ou não (simples)
 export function createQueryPlannerNode(llmClient: OpenRouterService) {
   return async (state: GraphState): Promise<Partial<GraphState>> => {
     try {
@@ -19,6 +23,9 @@ export function createQueryPlannerNode(llmClient: OpenRouterService) {
         }
       }
 
+      // Se a análise indicar que a questão é complexa, o modelo retorna um array de subquestões, e o fluxo é
+      // configurado para processar cada subquestão individualmente, gerando e executando uma query Cypher para cada
+      // subquestão, e depois sintetizando os resultados
       if (data?.requiresDecomposition && !!data.subQuestions?.length) {
         const subQuestionsFormatted = data.subQuestions.map((q: string, i: number) => `\n   ${i + 1}. ${q}`).join("")
 

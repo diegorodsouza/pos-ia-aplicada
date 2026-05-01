@@ -1,5 +1,8 @@
 import type { GraphState } from '../graph.ts';
 
+
+// Primeira etapa do fluxo
+// Extrair a questão do array de mensagens, garantindo que temos a questão correta para o processo
 export function createExtractQuestionNode() {
 
   return async (state: GraphState): Promise<Partial<GraphState>> => {

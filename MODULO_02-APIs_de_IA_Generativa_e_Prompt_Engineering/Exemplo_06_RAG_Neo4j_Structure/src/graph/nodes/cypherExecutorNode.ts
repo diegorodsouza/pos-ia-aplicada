@@ -2,6 +2,10 @@ import config from "../../config.ts"
 import { Neo4jService } from "../../services/neo4jService.ts"
 import type { GraphState } from "../graph.ts"
 
+// Quarta etapa do fluxo
+// Executar a query Cypher gerada, validando a query antes da execução para fornecer feedback de erro mais específico
+// para o modelo, e retornando os resultados da query para as etapas seguintes do processo ou retornar erros
+// específicos para orientar a correção automática da query, se necessário
 async function executeQuery(query: string, neo4jService: Neo4jService) {
   try {
     // Se a query não for válida, retornamos um erro específico para indicar que a validação falhou
